@@ -41,7 +41,10 @@
     <!-- Login Section -->
     <div id="login-section" class="min-h-screen flex items-center justify-center p-4 hidden">
         <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
-            <h1 class="text-3xl font-bold text-center text-gray-800">מערכת משוב לקוחות</h1>
+            <div class="flex justify-center items-center gap-3 text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3.45c0 .55.45 1 1 1h3.45c.55 0 1-.45 1-1V2"/><path d="M12 22v-3.45c0-.55-.45-1-1-1H7.55c-.55 0-1 .45-1 1V22"/><path d="M22 12h-3.45c-.55 0-1-.45-1-1V7.55c0-.55.45-1 1-1H22"/><path d="M2 12h3.45c.55 0 1 .45 1 1v3.45c0 .55-.45 1-1 1H2"/><circle cx="12" cy="12" r="4"/></svg>
+                <h1 class="text-3xl font-bold text-center">מערכת משוב לקוחות</h1>
+            </div>
             <p class="text-center text-gray-500">נא התחבר כדי להמשיך</p>
             <div id="auth-error" class="text-red-500 text-center font-semibold hidden"></div>
             <form id="login-form" class="space-y-4">
@@ -60,23 +63,26 @@
     <div id="app-section" class="min-h-screen hidden">
         <header class="bg-white shadow-md sticky top-0 z-40">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-indigo-600">ניהול משובים</h1>
-                <div class="relative">
-                    <div class="flex items-center space-x-2 rtl:space-x-reverse">
-                        <button id="toggle-user-email-btn" class="p-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3.45c0 .55.45 1 1 1h3.45c.55 0 1-.45 1-1V2"/><path d="M12 22v-3.45c0-.55-.45-1-1-1H7.55c-.55 0-1 .45-1 1V22"/><path d="M22 12h-3.45c-.55 0-1-.45-1-1V7.55c0-.55.45-1 1-1H22"/><path d="M2 12h3.45c.55 0 1 .45 1 1v3.45c0 .55-.45 1-1 1H2"/><circle cx="12" cy="12" r="4"/></svg>
+                    <h1 class="text-2xl font-bold text-indigo-600">ניהול משובים</h1>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="relative">
+                        <button id="toggle-user-email-btn" title="הצג משתמש" class="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </button>
-                        <button id="logout-btn" title="התנתק" class="w-auto p-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-red-500 hover:bg-red-600 focus:ring-red-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V5h10a1 1 0 100-2H3zm12.293 4.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L16.586 13H7a1 1 0 110-2h9.586l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
+                        <div id="user-email-container" class="absolute top-full left-0 rtl:left-auto rtl:right-0 mt-2 w-max max-w-xs bg-white border rounded-lg shadow-lg p-3 z-50 hidden">
+                            <span id="user-email" class="text-gray-700 text-sm font-medium break-all"></span>
+                        </div>
                     </div>
-                    <div id="user-email-container" class="absolute top-full left-0 rtl:left-auto rtl:right-0 mt-2 w-max max-w-xs bg-white border rounded-lg shadow-lg p-3 z-50 hidden">
-                        <span id="user-email" class="text-gray-700 text-sm font-medium break-all"></span>
-                    </div>
+                    <button id="logout-btn" title="התנתק" class="w-auto p-2 text-white font-semibold rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-red-500 hover:bg-red-600 focus:ring-red-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V5h10a1 1 0 100-2H3zm12.293 4.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L16.586 13H7a1 1 0 110-2h9.586l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </header>
@@ -322,13 +328,11 @@
             toggleUserEmailBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 userEmailContainer.classList.toggle('hidden');
-                toggleUserEmailBtn.querySelector('svg').classList.toggle('rotate-180');
             });
 
             window.addEventListener('click', (e) => {
                 if (!userEmailContainer.classList.contains('hidden') && !e.target.closest('#user-email-container') && !e.target.closest('#toggle-user-email-btn')) {
                     userEmailContainer.classList.add('hidden');
-                    toggleUserEmailBtn.querySelector('svg').classList.remove('rotate-180');
                 }
             });
 
