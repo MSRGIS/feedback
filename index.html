@@ -470,6 +470,15 @@
             const startDate = filterDateStart.value;
             const endDate = filterDateEnd.value;
 
+            // --- FIX START ---
+            // Priority is given to the "My Feedback" checkbox over the dropdown
+            if (filterMyFeedback.checked && auth.currentUser) {
+                 filteredFeedbacks = filteredFeedbacks.filter(fb => fb.author === auth.currentUser.email);
+            } else if (selectedUser) { // Only use dropdown if checkbox is off
+                filteredFeedbacks = filteredFeedbacks.filter(fb => fb.author === selectedUser);
+            }
+            // --- FIX END ---
+
             if (searchTerm) {
                 filteredFeedbacks = filteredFeedbacks.filter(fb => 
                     fb.details.toLowerCase().includes(searchTerm) ||
@@ -480,7 +489,8 @@
                 );
             }
             if (selectedType) filteredFeedbacks = filteredFeedbacks.filter(fb => fb.type === selectedType);
-            if (selectedUser) filteredFeedbacks = filteredFeedbacks.filter(fb => fb.author === selectedUser);
+            // This check is now handled by the new logic above, so we can remove the old one.
+            // if (selectedUser) filteredFeedbacks = filteredFeedbacks.filter(fb => fb.author === selectedUser); 
             if (startDate) {
                 const start = new Date(startDate);
                 start.setHours(0, 0, 0, 0);
@@ -507,9 +517,13 @@
         function renderFeedback(feedbacks) {
             feedbackList.innerHTML = '';
             
-            if (filterMyFeedback.checked && feedbacks.length === 0 && !allFeedbacks.some(fb => fb.author === auth.currentUser?.email)) {
+            // --- FIX START ---
+            // Simplified logic: If "My Feedback" is checked and the resulting list is empty,
+            // it means the user has no feedback. In this case, show nothing.
+            if (filterMyFeedback.checked && feedbacks.length === 0) {
                 return; 
             }
+            // --- FIX END ---
 
             if (feedbacks.length === 0) {
                 feedbackList.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-lg text-center text-gray-500">לא נמצאו משובים התואמים את הסינון.</div>`;
