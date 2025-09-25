@@ -1,0 +1,11 @@
+# קובץ הגדרות עבור Netlify
+# קובץ זה מנחה את Netlify איך לבנות ולהריץ את האתר
+
+[build]
+  # אין צורך בפקודת build כי זה אתר סטטי
+  # publish מציין את התיקייה הראשית של האתר
+  publish = "."
+
+[functions]
+  # מציין ל-Netlify שהפונקציות נמצאות בתיקייה הזו
+  directory = "netlify/functions"
