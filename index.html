@@ -12,22 +12,15 @@
         body {
             font-family: 'Assistant', sans-serif;
         }
-        .modal {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+        /* הסתרת ספינר ברירת מחדל בשדה מספר */
+        input[type='number']::-webkit-inner-spin-button,
+        input[type='number']::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
-        .collapsible-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-        }
-        .expanded .collapsible-content {
-            max-height: 1000px; /* Adjust as needed */
-        }
-        .chevron {
-            transition: transform 0.3s ease;
-        }
-        .expanded .chevron {
-            transform: rotate(180deg);
+        input[type='number'] {
+            -moz-appearance: textfield;
+            appearance: none;
         }
     </style>
 </head>
@@ -58,36 +51,62 @@
 
     <!-- Main App Section -->
     <div id="app-section" class="min-h-screen hidden">
-        <header class="bg-white shadow-md sticky top-0 z-40">
+        <header class="bg-white shadow-md">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-indigo-600">ניהול משובים</h1>
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <span id="user-email" class="text-gray-600 text-sm sm:text-base"></span>
+                    <span id="user-email" class="text-gray-600 hidden sm:block"></span>
                     <button id="logout-btn" class="w-auto px-4 py-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-red-500 hover:bg-red-600 focus:ring-red-400">התנתק</button>
                 </div>
             </div>
         </header>
 
         <main class="container mx-auto p-4 sm:p-6 lg:p-8">
-            <div class="mb-6">
-                 <button id="open-feedback-modal-btn" class="w-full sm:w-auto px-6 py-3 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
-                    <span>הוספת משוב חדש</span>
-                </button>
-            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Feedback Form -->
+                <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg self-start">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">הוספת משוב חדש</h2>
+                    <form id="feedback-form" class="space-y-4">
+                        <div>
+                            <label for="feedback-type" class="block text-sm font-medium text-gray-700">סוג הפנייה</label>
+                            <select id="feedback-type" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors" required>
+                                <option value="" disabled selected>בחר סוג...</option>
+                                <option value="תלונה">תלונה</option>
+                                <option value="הצעה לשיפור">הצעה לשיפור</option>
+                                <option value="שאלה טכנית">שאלה טכנית</option>
+                                <option value="מחמאה">מחמאה</option>
+                                <option value="אחר">אחר</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="client-name" class="block text-sm font-medium text-gray-700">שם הלקוח/ה</label>
+                            <input type="text" id="client-name" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors" required>
+                        </div>
+                        <div>
+                            <label for="client-phone" class="block text-sm font-medium text-gray-700">טלפון</label>
+                            <input type="tel" id="client-phone" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors" required>
+                        </div>
+                         <div>
+                            <label for="client-city" class="block text-sm font-medium text-gray-700">עיר</label>
+                            <input type="text" id="client-city" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors" required>
+                        </div>
+                        <div>
+                            <label for="client-email" class="block text-sm font-medium text-gray-700">מייל</label>
+                            <input type="email" id="client-email" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors" required>
+                        </div>
+                        <div>
+                            <label for="feedback-details" class="block text-sm font-medium text-gray-700">פרטי הפנייה/המשוב</label>
+                            <textarea id="feedback-details" rows="5" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors" required></textarea>
+                        </div>
+                        <button type="submit" class="w-full px-4 py-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500">שליחת משוב</button>
+                    </form>
+                </div>
 
-            <!-- Filters Section -->
-            <div id="filters-container" class="bg-white rounded-xl shadow-lg mb-6 expanded">
-                <button id="toggle-filters-btn" class="w-full p-4 flex justify-between items-center cursor-pointer">
-                    <h3 class="text-lg font-bold text-gray-800">סינון וחיפוש</h3>
-                    <svg class="h-6 w-6 text-gray-600 chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div class="collapsible-content">
-                    <div class="p-4 border-t space-y-4">
+                <!-- Feedback List & Filters -->
+                <div class="lg:col-span-2">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">רשימת משובים</h2>
+                    <!-- Filters Section -->
+                    <div class="bg-white p-4 rounded-xl shadow-lg mb-6 space-y-4">
                         <div>
                             <label for="filter-text" class="block text-sm font-medium text-gray-700">חיפוש חופשי</label>
                             <input type="text" id="filter-text" placeholder="הקלד לחיפוש..." class="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500">
@@ -127,84 +146,21 @@
                             <button id="reset-filters-btn" class="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-100 rounded-lg hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">איפוס סינונים</button>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div id="feedback-list" class="space-y-4">
-                <!-- Feedback items will be injected here -->
+                    <div id="feedback-list" class="space-y-4">
+                        <!-- Feedback items will be injected here -->
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- Add/Edit Feedback Modal -->
-    <div id="feedback-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 invisible opacity-0">
-        <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg transform transition-transform scale-95">
-             <div class="flex justify-between items-center p-4 border-b">
-                <h2 class="text-xl font-bold text-gray-800">הוספת משוב חדש</h2>
-                <button id="close-feedback-modal-btn" class="text-gray-500 hover:text-gray-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <div class="p-6 max-h-[70vh] overflow-y-auto">
-                <form id="feedback-form" class="space-y-4">
-                    <div>
-                        <label for="feedback-type" class="block text-sm font-medium text-gray-700">סוג הפנייה</label>
-                        <select id="feedback-type" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                            <option value="" disabled selected>בחר סוג...</option>
-                            <option value="תלונה">תלונה</option>
-                            <option value="הצעה לשיפור">הצעה לשיפור</option>
-                            <option value="שאלה טכנית">שאלה טכנית</option>
-                            <option value="מחמאה">מחמאה</option>
-                            <option value="אחר">אחר</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="client-name" class="block text-sm font-medium text-gray-700">שם הלקוח/ה</label>
-                        <input type="text" id="client-name" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                    </div>
-                    <div>
-                        <label for="client-phone" class="block text-sm font-medium text-gray-700">טלפון</label>
-                        <input type="tel" id="client-phone" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                    </div>
-                     <div>
-                        <label for="client-city" class="block text-sm font-medium text-gray-700">עיר</label>
-                        <input type="text" id="client-city" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                    </div>
-                    <div>
-                        <label for="client-email" class="block text-sm font-medium text-gray-700">מייל</label>
-                        <input type="email" id="client-email" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                    </div>
-                    <div>
-                        <label for="feedback-details" class="block text-sm font-medium text-gray-700">פרטי הפנייה/המשוב</label>
-                        <textarea id="feedback-details" rows="5" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required></textarea>
-                    </div>
-                    <div class="pt-4 flex justify-end">
-                        <button type="submit" class="px-6 py-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500">שמירת משוב</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Delete Confirmation Modal -->
-    <div id="delete-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 invisible opacity-0">
-        <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-6 space-y-4">
-             <h3 class="text-lg font-bold text-gray-800">אישור מחיקה</h3>
-             <p class="text-gray-600">האם אתה בטוח שברצונך למחוק את המשוב הזה? לא ניתן לשחזר את הפעולה.</p>
-             <div class="flex justify-end space-x-4 rtl:space-x-reverse">
-                <button id="cancel-delete-btn" class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold">ביטול</button>
-                <button id="confirm-delete-btn" class="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg font-semibold">מחיקה</button>
-             </div>
-        </div>
-    </div>
-
     <!-- Firebase SDK -->
     <script type="module">
+        // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // DOM Elements
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -216,21 +172,11 @@
         const authError = document.getElementById('auth-error');
         const userEmailSpan = document.getElementById('user-email');
         const logoutBtn = document.getElementById('logout-btn');
-        const rememberMeCheckbox = document.getElementById('remember-me');
-        const feedbackList = document.getElementById('feedback-list');
-
-        // Modal Elements
-        const feedbackModal = document.getElementById('feedback-modal');
-        const openFeedbackModalBtn = document.getElementById('open-feedback-modal-btn');
-        const closeFeedbackModalBtn = document.getElementById('close-feedback-modal-btn');
         const feedbackForm = document.getElementById('feedback-form');
-        const deleteModal = document.getElementById('delete-modal');
-        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const feedbackList = document.getElementById('feedback-list');
+        const rememberMeCheckbox = document.getElementById('remember-me');
 
         // Filter Elements
-        const filtersContainer = document.getElementById('filters-container');
-        const toggleFiltersBtn = document.getElementById('toggle-filters-btn');
         const filterText = document.getElementById('filter-text');
         const filterType = document.getElementById('filter-type');
         const filterUser = document.getElementById('filter-user');
@@ -240,16 +186,29 @@
         const resetFiltersBtn = document.getElementById('reset-filters-btn');
 
         let auth, db;
-        let allFeedbacks = [];
-        let feedbackIdToDelete = null;
+        let allFeedbacks = []; // To store all feedbacks for client-side filtering
 
         // --- Step 1: Securely Fetch Firebase Config ---
-        async function getFirebaseConfig() { /* ... unchanged ... */ }
+        async function getFirebaseConfig() {
+            try {
+                const response = await fetch('/.netlify/functions/firebase-config');
+                if (!response.ok) throw new Error('Could not fetch Firebase configuration.');
+                return await response.json();
+            } catch (error) {
+                console.error("Error fetching config:", error);
+                document.body.innerHTML = '<h1 class="text-center text-red-500 p-8">שגיאה קריטית: לא ניתן לטעון את הגדרות המערכת.</h1>';
+                return null;
+            }
+        }
         
-        // --- Step 2: Initialize App ---
+        // --- Step 2: Initialize Firebase and App Logic ---
         async function main() {
             const firebaseConfig = await getFirebaseConfig();
-            if (!firebaseConfig) { loadingOverlay.classList.add('hidden'); return; }
+
+            if (!firebaseConfig) {
+                loadingOverlay.classList.add('hidden');
+                return;
+            }
 
             const app = initializeApp(firebaseConfig);
             auth = getAuth(app);
@@ -269,77 +228,72 @@
                 }
             });
 
-            // Event Listeners Setup
-            setupEventListeners();
-        }
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                loadingOverlay.classList.remove('hidden');
+                authError.classList.add('hidden');
+                
+                const persistence = rememberMeCheckbox.checked ? browserLocalPersistence : browserSessionPersistence;
+                
+                try {
+                    await setPersistence(auth, persistence);
+                    await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+                } catch (error) {
+                    console.error("Login failed:", error.message);
+                    authError.textContent = "שם משתמש או סיסמה שגויים.";
+                    authError.classList.remove('hidden');
+                } finally {
+                    loadingOverlay.classList.add('hidden');
+                }
+            });
 
-        function setupEventListeners() {
-            loginForm.addEventListener('submit', handleLogin);
             logoutBtn.addEventListener('click', () => signOut(auth));
-            
-            // Modals
-            openFeedbackModalBtn.addEventListener('click', () => openModal(feedbackModal));
-            closeFeedbackModalBtn.addEventListener('click', () => closeModal(feedbackModal));
-            feedbackModal.addEventListener('click', (e) => { if (e.target === feedbackModal) closeModal(feedbackModal); });
-            feedbackForm.addEventListener('submit', handleFeedbackSubmit);
 
-            deleteModal.addEventListener('click', (e) => { if (e.target === deleteModal) closeModal(deleteModal); });
-            cancelDeleteBtn.addEventListener('click', () => closeModal(deleteModal));
-            confirmDeleteBtn.addEventListener('click', handleDeleteConfirmation);
+            feedbackForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const user = auth.currentUser;
+                if (!user) { alert("יש להתחבר למערכת."); return; }
 
-            // Filters & Cards
-            toggleFiltersBtn.addEventListener('click', () => filtersContainer.classList.toggle('expanded'));
+                const feedbackData = {
+                    author: user.email,
+                    type: document.getElementById('feedback-type').value,
+                    client: {
+                        name: document.getElementById('client-name').value,
+                        phone: document.getElementById('client-phone').value,
+                        city: document.getElementById('client-city').value,
+                        email: document.getElementById('client-email').value,
+                    },
+                    details: document.getElementById('feedback-details').value,
+                    createdAt: serverTimestamp()
+                };
+                
+                try {
+                    await addDoc(collection(db, "feedback"), feedbackData);
+                    feedbackForm.reset();
+                } catch (error) {
+                    console.error("Error adding document: ", error);
+                    alert("אירעה שגיאה בשמירת המשוב.");
+                }
+            });
+
+            // Add event listeners to filters
             [filterText, filterType, filterUser, filterMyFeedback, filterDateStart, filterDateEnd].forEach(el => {
                 el.addEventListener('input', applyFiltersAndRender);
             });
-            filterMyFeedback.addEventListener('change', handleMyFeedbackToggle);
-            resetFiltersBtn.addEventListener('click', resetFilters);
-            feedbackList.addEventListener('click', handleFeedbackListClick);
-        }
+            
+            // Toggle user filter when checkbox is changed
+            filterMyFeedback.addEventListener('change', () => {
+                if (filterMyFeedback.checked) {
+                    filterUser.value = auth.currentUser.email;
+                    filterUser.disabled = true;
+                } else {
+                    filterUser.value = '';
+                    filterUser.disabled = false;
+                }
+                applyFiltersAndRender();
+            });
 
-        // --- Authentication ---
-        async function handleLogin(e) {
-            e.preventDefault();
-            loadingOverlay.classList.remove('hidden');
-            authError.classList.add('hidden');
-            const persistence = rememberMeCheckbox.checked ? browserLocalPersistence : browserSessionPersistence;
-            try {
-                await setPersistence(auth, persistence);
-                await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-            } catch (error) {
-                console.error("Login failed:", error.message);
-                authError.textContent = "שם משתמש או סיסמה שגויים.";
-                authError.classList.remove('hidden');
-            } finally {
-                loadingOverlay.classList.add('hidden');
-            }
-        }
-        
-        // --- Firestore Data ---
-        async function handleFeedbackSubmit(e) {
-            e.preventDefault();
-            const user = auth.currentUser;
-            if (!user) { alert("יש להתחבר למערכת."); return; }
-            const feedbackData = {
-                author: user.email,
-                type: feedbackForm.querySelector('#feedback-type').value,
-                client: {
-                    name: feedbackForm.querySelector('#client-name').value,
-                    phone: feedbackForm.querySelector('#client-phone').value,
-                    city: feedbackForm.querySelector('#client-city').value,
-                    email: feedbackForm.querySelector('#client-email').value,
-                },
-                details: feedbackForm.querySelector('#feedback-details').value,
-                createdAt: serverTimestamp()
-            };
-            try {
-                await addDoc(collection(db, "feedback"), feedbackData);
-                feedbackForm.reset();
-                closeModal(feedbackModal);
-            } catch (error) {
-                console.error("Error adding document: ", error);
-                alert("אירעה שגיאה בשמירת המשוב.");
-            }
+            resetFiltersBtn.addEventListener('click', resetFilters);
         }
 
         function fetchFeedback() {
@@ -350,64 +304,107 @@
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     feedbacks.push({ id: doc.id, ...data });
-                    if (data.author) users.add(data.author);
+                    if(data.author) users.add(data.author);
                 });
+                
                 allFeedbacks = feedbacks.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+                
                 populateUserFilter(users);
-                resetFilters();
+                resetFilters(); // Call reset to set the initial default view
             });
         }
-        
-        async function handleDeleteConfirmation() {
-            if (!feedbackIdToDelete) return;
-            try {
-                await deleteDoc(doc(db, "feedback", feedbackIdToDelete));
-            } catch (error) {
-                console.error("Error removing document: ", error);
-                alert("אירעה שגיאה במחיקת המשוב.");
-            } finally {
-                closeModal(deleteModal);
-                feedbackIdToDelete = null;
-            }
+
+        function populateUserFilter(users) {
+            const currentVal = filterUser.value;
+            filterUser.innerHTML = '<option value="">כל המשתמשים</option>'; // Reset
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user;
+                option.textContent = user;
+                filterUser.appendChild(option);
+            });
+            filterUser.value = currentVal;
         }
-        
-        // --- UI & Filtering Logic ---
-        function handleMyFeedbackToggle() {
-            filterUser.disabled = filterMyFeedback.checked;
-            filterUser.value = filterMyFeedback.checked ? auth.currentUser.email : '';
+
+        function resetFilters() {
+            filterText.value = '';
+            filterType.value = '';
+            filterDateStart.value = '';
+            filterDateEnd.value = '';
+            
+            filterMyFeedback.checked = true;
+            
+            if (auth.currentUser) {
+                filterUser.value = auth.currentUser.email;
+                filterUser.disabled = true;
+            } else {
+                filterUser.value = '';
+                filterUser.disabled = false;
+            }
+
             applyFiltersAndRender();
         }
 
-        function handleFeedbackListClick(e) {
-            const cardHeader = e.target.closest('.card-header');
-            const deleteButton = e.target.closest('.delete-btn');
+        function applyFiltersAndRender() {
+            let filteredFeedbacks = [...allFeedbacks];
+            const searchTerm = filterText.value.toLowerCase();
+            const selectedType = filterType.value;
+            const selectedUser = filterUser.value;
+            const startDate = filterDateStart.value;
+            const endDate = filterDateEnd.value;
 
-            if (deleteButton) {
-                feedbackIdToDelete = deleteButton.dataset.id;
-                openModal(deleteModal);
-                return;
+
+            if (searchTerm) {
+                filteredFeedbacks = filteredFeedbacks.filter(fb => 
+                    fb.details.toLowerCase().includes(searchTerm) ||
+                    fb.client.name.toLowerCase().includes(searchTerm) ||
+                    fb.client.phone.includes(searchTerm) ||
+                    fb.client.city.toLowerCase().includes(searchTerm) ||
+                    fb.client.email.toLowerCase().includes(searchTerm)
+                );
             }
-            if (cardHeader) {
-                cardHeader.parentElement.classList.toggle('expanded');
+
+            if (selectedType) {
+                filteredFeedbacks = filteredFeedbacks.filter(fb => fb.type === selectedType);
+            }
+
+            if (selectedUser) {
+                filteredFeedbacks = filteredFeedbacks.filter(fb => fb.author === selectedUser);
+            }
+
+            if (startDate) {
+                const start = new Date(startDate);
+                start.setHours(0, 0, 0, 0); // Set to start of the day
+                filteredFeedbacks = filteredFeedbacks.filter(fb => {
+                    const fbDate = fb.createdAt?.toDate();
+                    return fbDate && fbDate >= start;
+                });
+            }
+
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999); // Set to end of the day
+                filteredFeedbacks = filteredFeedbacks.filter(fb => {
+                    const fbDate = fb.createdAt?.toDate();
+                    return fbDate && fbDate <= end;
+                });
+            }
+            
+            renderFeedback(filteredFeedbacks);
+        }
+
+        function getFeedbackTypeColors(type) {
+            switch (type) {
+                case 'תלונה':       return 'border-red-500 bg-red-100 text-red-700';
+                case 'מחמאה':      return 'border-green-500 bg-green-100 text-green-700';
+                case 'הצעה לשיפור': return 'border-blue-500 bg-blue-100 text-blue-700';
+                case 'שאלה טכנית': return 'border-yellow-500 bg-yellow-100 text-yellow-700';
+                default:           return 'border-gray-500 bg-gray-100 text-gray-700';
             }
         }
-        
-        function populateUserFilter(users) { /* ... unchanged ... */ }
-        function resetFilters() { /* ... unchanged ... */ }
-        function applyFiltersAndRender() { /* ... unchanged ... */ }
-        function getFeedbackTypeColors(type) { /* ... unchanged ... */ }
 
         function renderFeedback(feedbacks) {
             feedbackList.innerHTML = '';
-
-            // Handle special empty case for "My Feedback"
-            if (filterMyFeedback.checked && feedbacks.length === 0) {
-                 const userHasNoFeedbackAtAll = !allFeedbacks.some(fb => fb.author === auth.currentUser.email);
-                 if (userHasNoFeedbackAtAll) {
-                    return; // Display nothing as requested
-                 }
-            }
-
             if (feedbacks.length === 0) {
                 feedbackList.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-lg text-center text-gray-500">לא נמצאו משובים התואמים את הסינון.</div>`;
                 return;
@@ -418,66 +415,28 @@
                 const [borderColor, tagBgColor, tagTextColor] = getFeedbackTypeColors(fb.type).split(' ');
                 
                 const card = document.createElement('div');
-                card.className = `bg-white rounded-xl shadow-lg`;
+                card.className = `bg-white p-6 rounded-xl shadow-lg border-l-4 ${borderColor}`;
                 card.innerHTML = `
-                    <div class="card-header p-4 flex justify-between items-center cursor-pointer border-l-4 ${borderColor} rounded-r-lg">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-4">
-                                <span class="text-sm font-bold ${tagTextColor} ${tagBgColor} px-3 py-1 rounded-full">${fb.type}</span>
-                                <p class="text-gray-800 truncate">${fb.details}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-4 rtl:space-x-reverse ml-4 rtl:ml-0 rtl:mr-4 flex-shrink-0">
-                             ${fb.author === auth.currentUser.email ? 
-                                `<button class="delete-btn text-gray-400 hover:text-red-600" data-id="${fb.id}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>` : ''}
-                            <span class="text-xs text-gray-500">${date}</span>
-                            <svg class="h-5 w-5 text-gray-500 chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-sm font-bold ${tagTextColor} ${tagBgColor} px-3 py-1 rounded-full">${fb.type}</span>
+                        <span class="text-xs text-gray-500">${date}</span>
                     </div>
-                    <div class="collapsible-content">
-                        <div class="p-4 border-t">
-                            <h4 class="font-semibold text-gray-700 mb-2">פרטי הלקוח/ה</h4>
-                            <p class="text-sm text-gray-600"><strong class="font-medium">שם:</strong> ${fb.client.name}</p>
-                            <p class="text-sm text-gray-600"><strong class="font-medium">טלפון:</strong> <a href="tel:${fb.client.phone}" class="text-indigo-600 hover:underline">${fb.client.phone}</a></p>
-                            <p class="text-sm text-gray-600"><strong class="font-medium">עיר:</strong> ${fb.client.city}</p>
-                            <p class="text-sm text-gray-600"><strong class="font-medium">מייל:</strong> ${fb.client.email}</p>
-                            <p class="text-sm text-gray-500 mt-2"><strong class="font-medium">נפתח על ידי:</strong> ${fb.author}</p>
-                        </div>
+                    <p class="text-gray-800 mb-4 whitespace-pre-wrap">${fb.details}</p>
+                    <div class="border-t pt-4 mt-4">
+                        <h4 class="font-semibold text-gray-700 mb-2">פרטי הלקוח/ה</h4>
+                        <p class="text-sm text-gray-600"><strong class="font-medium">שם:</strong> ${fb.client.name}</p>
+                        <p class="text-sm text-gray-600"><strong class="font-medium">טלפון:</strong> <a href="tel:${fb.client.phone}" class="text-indigo-600 hover:underline">${fb.client.phone}</a></p>
+                        <p class="text-sm text-gray-600"><strong class="font-medium">עיר:</strong> ${fb.client.city}</p>
+                        <p class="text-sm text-gray-600"><strong class="font-medium">מייל:</strong> ${fb.client.email}</p>
+                        <p class="text-sm text-gray-500 mt-2"><strong class="font-medium">נפתח על ידי:</strong> ${fb.author}</p>
                     </div>
                 `;
                 feedbackList.appendChild(card);
             });
         }
-        
-        // --- Modal Controls ---
-        function openModal(modal) {
-            modal.classList.remove('invisible', 'opacity-0');
-            modal.querySelector('div').classList.remove('scale-95');
-        }
 
-        function closeModal(modal) {
-            modal.classList.add('opacity-0');
-            modal.querySelector('div').classList.add('scale-95');
-            setTimeout(() => modal.classList.add('invisible'), 300);
-        }
-
-        // --- Start the application ---
-        getFirebaseConfig().then(main).catch(err => {
-            console.error("Initialization failed", err);
-            document.body.innerHTML = '<h1 class="text-center text-red-500 p-8">שגיאה קריטית באתחול המערכת.</h1>';
-        });
-
-        // Duplicate function definitions were removed and logic was consolidated.
-        // The following functions are already defined above and are just placeholders here for clarity
-        // async function getFirebaseConfig() { ... }
-        // function populateUserFilter(users) { ... }
-        // function resetFilters() { ... }
-        // function applyFiltersAndRender() { ... }
-        // function getFeedbackTypeColors(type) { ... }
+        // Start the application
+        main();
     </script>
 </body>
 </html>
