@@ -140,7 +140,7 @@
     <div id="feedback-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 invisible opacity-0">
         <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg transform transition-transform scale-95">
              <div class="flex justify-between items-center p-4 border-b">
-                <h2 class="text-xl font-bold text-gray-800">הוספת משוב חדש</h2>
+                <h2 id="modal-title" class="text-xl font-bold text-gray-800">הוספת משוב חדש</h2>
                 <button id="close-feedback-modal-btn" class="text-gray-500 hover:text-gray-800">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -149,6 +149,7 @@
             </div>
             <div class="p-6 max-h-[70vh] overflow-y-auto">
                 <form id="feedback-form" class="space-y-4">
+                    <input type="hidden" id="feedback-id">
                     <div>
                         <label for="feedback-type" class="block text-sm font-medium text-gray-700">סוג הפנייה</label>
                         <select id="feedback-type" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
@@ -181,7 +182,7 @@
                         <textarea id="feedback-details" rows="5" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required></textarea>
                     </div>
                     <div class="pt-4 flex justify-end">
-                        <button type="submit" class="px-6 py-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500">שמירת משוב</button>
+                        <button type="submit" id="feedback-submit-btn" class="px-6 py-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500">שמירת משוב</button>
                     </div>
                 </form>
             </div>
@@ -204,7 +205,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // DOM Elements
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -221,9 +222,12 @@
 
         // Modal Elements
         const feedbackModal = document.getElementById('feedback-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const feedbackSubmitBtn = document.getElementById('feedback-submit-btn');
         const openFeedbackModalBtn = document.getElementById('open-feedback-modal-btn');
         const closeFeedbackModalBtn = document.getElementById('close-feedback-modal-btn');
         const feedbackForm = document.getElementById('feedback-form');
+        const feedbackIdInput = document.getElementById('feedback-id');
         const deleteModal = document.getElementById('delete-modal');
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
@@ -243,13 +247,26 @@
         let allFeedbacks = [];
         let feedbackIdToDelete = null;
 
-        // --- Step 1: Securely Fetch Firebase Config ---
-        async function getFirebaseConfig() { /* ... unchanged ... */ }
+        // --- Securely Fetch Firebase Config ---
+        async function getFirebaseConfig() {
+            try {
+                const response = await fetch('/.netlify/functions/firebase-config');
+                if (!response.ok) throw new Error('Could not fetch Firebase configuration.');
+                return await response.json();
+            } catch (error) {
+                console.error("Error fetching config:", error);
+                document.body.innerHTML = '<h1 class="text-center text-red-500 p-8">שגיאה קריטית: לא ניתן לטעון את הגדרות המערכת.</h1>';
+                return null;
+            }
+        }
         
-        // --- Step 2: Initialize App ---
+        // --- Initialize App ---
         async function main() {
             const firebaseConfig = await getFirebaseConfig();
-            if (!firebaseConfig) { loadingOverlay.classList.add('hidden'); return; }
+            if (!firebaseConfig) { 
+                loadingOverlay.classList.add('hidden'); 
+                return; 
+            }
 
             const app = initializeApp(firebaseConfig);
             auth = getAuth(app);
@@ -269,7 +286,6 @@
                 }
             });
 
-            // Event Listeners Setup
             setupEventListeners();
         }
 
@@ -277,8 +293,7 @@
             loginForm.addEventListener('submit', handleLogin);
             logoutBtn.addEventListener('click', () => signOut(auth));
             
-            // Modals
-            openFeedbackModalBtn.addEventListener('click', () => openModal(feedbackModal));
+            openFeedbackModalBtn.addEventListener('click', openAddModal);
             closeFeedbackModalBtn.addEventListener('click', () => closeModal(feedbackModal));
             feedbackModal.addEventListener('click', (e) => { if (e.target === feedbackModal) closeModal(feedbackModal); });
             feedbackForm.addEventListener('submit', handleFeedbackSubmit);
@@ -287,7 +302,6 @@
             cancelDeleteBtn.addEventListener('click', () => closeModal(deleteModal));
             confirmDeleteBtn.addEventListener('click', handleDeleteConfirmation);
 
-            // Filters & Cards
             toggleFiltersBtn.addEventListener('click', () => filtersContainer.classList.toggle('expanded'));
             [filterText, filterType, filterUser, filterMyFeedback, filterDateStart, filterDateEnd].forEach(el => {
                 el.addEventListener('input', applyFiltersAndRender);
@@ -320,8 +334,9 @@
             e.preventDefault();
             const user = auth.currentUser;
             if (!user) { alert("יש להתחבר למערכת."); return; }
+            
+            const feedbackId = feedbackIdInput.value;
             const feedbackData = {
-                author: user.email,
                 type: feedbackForm.querySelector('#feedback-type').value,
                 client: {
                     name: feedbackForm.querySelector('#client-name').value,
@@ -330,14 +345,21 @@
                     email: feedbackForm.querySelector('#client-email').value,
                 },
                 details: feedbackForm.querySelector('#feedback-details').value,
-                createdAt: serverTimestamp()
             };
+
             try {
-                await addDoc(collection(db, "feedback"), feedbackData);
+                if (feedbackId) { // Update existing feedback
+                    const feedbackRef = doc(db, "feedback", feedbackId);
+                    await updateDoc(feedbackRef, feedbackData);
+                } else { // Add new feedback
+                    feedbackData.author = user.email;
+                    feedbackData.createdAt = serverTimestamp();
+                    await addDoc(collection(db, "feedback"), feedbackData);
+                }
                 feedbackForm.reset();
                 closeModal(feedbackModal);
             } catch (error) {
-                console.error("Error adding document: ", error);
+                console.error("Error saving document: ", error);
                 alert("אירעה שגיאה בשמירת המשוב.");
             }
         }
@@ -381,10 +403,19 @@
         function handleFeedbackListClick(e) {
             const cardHeader = e.target.closest('.card-header');
             const deleteButton = e.target.closest('.delete-btn');
+            const editButton = e.target.closest('.edit-btn');
 
             if (deleteButton) {
                 feedbackIdToDelete = deleteButton.dataset.id;
                 openModal(deleteModal);
+                return;
+            }
+             if (editButton) {
+                const feedbackId = editButton.dataset.id;
+                const feedback = allFeedbacks.find(fb => fb.id === feedbackId);
+                if (feedback) {
+                    openEditModal(feedback);
+                }
                 return;
             }
             if (cardHeader) {
@@ -392,22 +423,84 @@
             }
         }
         
-        function populateUserFilter(users) { /* ... unchanged ... */ }
-        function resetFilters() { /* ... unchanged ... */ }
-        function applyFiltersAndRender() { /* ... unchanged ... */ }
-        function getFeedbackTypeColors(type) { /* ... unchanged ... */ }
+        function populateUserFilter(users) {
+            const currentVal = filterUser.value;
+            filterUser.innerHTML = '<option value="">כל המשתמשים</option>'; // Reset
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user;
+                option.textContent = user;
+                filterUser.appendChild(option);
+            });
+            filterUser.value = currentVal;
+        }
+
+        function resetFilters() {
+            filterText.value = '';
+            filterType.value = '';
+            filterDateStart.value = '';
+            filterDateEnd.value = '';
+            filterMyFeedback.checked = true;
+            if (auth.currentUser) {
+                filterUser.value = auth.currentUser.email;
+                filterUser.disabled = true;
+            } else {
+                filterUser.value = '';
+                filterUser.disabled = false;
+            }
+            applyFiltersAndRender();
+        }
+
+        function applyFiltersAndRender() {
+            let filteredFeedbacks = [...allFeedbacks];
+            const searchTerm = filterText.value.toLowerCase();
+            const selectedType = filterType.value;
+            const selectedUser = filterUser.value;
+            const startDate = filterDateStart.value;
+            const endDate = filterDateEnd.value;
+
+            if (searchTerm) {
+                filteredFeedbacks = filteredFeedbacks.filter(fb => 
+                    fb.details.toLowerCase().includes(searchTerm) ||
+                    fb.client.name.toLowerCase().includes(searchTerm) ||
+                    fb.client.phone.includes(searchTerm) ||
+                    fb.client.city.toLowerCase().includes(searchTerm) ||
+                    fb.client.email.toLowerCase().includes(searchTerm)
+                );
+            }
+            if (selectedType) filteredFeedbacks = filteredFeedbacks.filter(fb => fb.type === selectedType);
+            if (selectedUser) filteredFeedbacks = filteredFeedbacks.filter(fb => fb.author === selectedUser);
+            if (startDate) {
+                const start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                filteredFeedbacks = filteredFeedbacks.filter(fb => fb.createdAt?.toDate() >= start);
+            }
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                filteredFeedbacks = filteredFeedbacks.filter(fb => fb.createdAt?.toDate() <= end);
+            }
+            renderFeedback(filteredFeedbacks);
+        }
+
+        function getFeedbackTypeColors(type) {
+            switch (type) {
+                case 'תלונה':       return 'border-red-500 bg-red-100 text-red-700';
+                case 'מחמאה':      return 'border-green-500 bg-green-100 text-green-700';
+                case 'הצעה לשיפור': return 'border-blue-500 bg-blue-100 text-blue-700';
+                case 'שאלה טכנית': return 'border-yellow-500 bg-yellow-100 text-yellow-700';
+                default:           return 'border-gray-500 bg-gray-100 text-gray-700';
+            }
+        }
 
         function renderFeedback(feedbacks) {
             feedbackList.innerHTML = '';
-
-            // Handle special empty case for "My Feedback"
             if (filterMyFeedback.checked && feedbacks.length === 0) {
                  const userHasNoFeedbackAtAll = !allFeedbacks.some(fb => fb.author === auth.currentUser.email);
                  if (userHasNoFeedbackAtAll) {
-                    return; // Display nothing as requested
+                    return; 
                  }
             }
-
             if (feedbacks.length === 0) {
                 feedbackList.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-lg text-center text-gray-500">לא נמצאו משובים התואמים את הסינון.</div>`;
                 return;
@@ -427,9 +520,15 @@
                                 <p class="text-gray-800 truncate">${fb.details}</p>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-4 rtl:space-x-reverse ml-4 rtl:ml-0 rtl:mr-4 flex-shrink-0">
+                        <div class="flex items-center space-x-2 rtl:space-x-reverse ml-2 rtl:ml-0 rtl:mr-2 flex-shrink-0">
                              ${fb.author === auth.currentUser.email ? 
-                                `<button class="delete-btn text-gray-400 hover:text-red-600" data-id="${fb.id}">
+                                `<button class="edit-btn text-gray-400 hover:text-indigo-600 p-1" data-id="${fb.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                                        <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <button class="delete-btn text-gray-400 hover:text-red-600 p-1" data-id="${fb.id}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                       <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                                     </svg>
@@ -462,22 +561,41 @@
         function closeModal(modal) {
             modal.classList.add('opacity-0');
             modal.querySelector('div').classList.add('scale-95');
-            setTimeout(() => modal.classList.add('invisible'), 300);
+            setTimeout(() => {
+                modal.classList.add('invisible');
+                feedbackForm.reset();
+                feedbackIdInput.value = '';
+            }, 300);
+        }
+
+        function openAddModal() {
+            feedbackForm.reset();
+            feedbackIdInput.value = '';
+            modalTitle.textContent = 'הוספת משוב חדש';
+            feedbackSubmitBtn.textContent = 'שמירת משוב';
+            openModal(feedbackModal);
+        }
+
+        function openEditModal(feedback) {
+            feedbackForm.reset();
+            feedbackIdInput.value = feedback.id;
+            modalTitle.textContent = 'עריכת משוב';
+            feedbackSubmitBtn.textContent = 'עדכון משוב';
+            
+            // Populate form
+            feedbackForm.querySelector('#feedback-type').value = feedback.type;
+            feedbackForm.querySelector('#client-name').value = feedback.client.name;
+            feedbackForm.querySelector('#client-phone').value = feedback.client.phone;
+            feedbackForm.querySelector('#client-city').value = feedback.client.city;
+            feedbackForm.querySelector('#client-email').value = feedback.client.email;
+            feedbackForm.querySelector('#feedback-details').value = feedback.details;
+            
+            openModal(feedbackModal);
         }
 
         // --- Start the application ---
-        getFirebaseConfig().then(main).catch(err => {
-            console.error("Initialization failed", err);
-            document.body.innerHTML = '<h1 class="text-center text-red-500 p-8">שגיאה קריטית באתחול המערכת.</h1>';
-        });
+        main();
 
-        // Duplicate function definitions were removed and logic was consolidated.
-        // The following functions are already defined above and are just placeholders here for clarity
-        // async function getFirebaseConfig() { ... }
-        // function populateUserFilter(users) { ... }
-        // function resetFilters() { ... }
-        // function applyFiltersAndRender() { ... }
-        // function getFeedbackTypeColors(type) { ... }
     </script>
 </body>
 </html>
