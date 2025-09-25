@@ -212,7 +212,7 @@
                         <input type="email" id="client-email" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                     </div>
                     <div>
-                        <label for="feedback-details" class="block text-sm font-medium text-gray-700">פרטי הפנייה/המשוב</label>
+                        <label for="feedback-details" class="block text-sm font-medium text-gray-700">פרטי המשוב</label>
                         <textarea id="feedback-details" rows="5" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required></textarea>
                     </div>
                     <div class="pt-4 flex justify-end">
@@ -595,7 +595,7 @@
                         <div class="p-4 border-t space-y-4">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h4 class="font-semibold text-gray-700">פרטי הפנייה/המשוב</h4>
+                                    <h4 class="font-semibold text-gray-700">פרטי המשוב</h4>
                                     <p class="text-gray-800 whitespace-pre-wrap mt-1">${fb.details}</p>
                                 </div>
                                 ${fb.author === auth.currentUser.email ? 
@@ -675,5 +675,6 @@
     </script>
 </body>
 </html>
+
 
 
