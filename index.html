@@ -61,8 +61,13 @@
         <header class="bg-white shadow-md sticky top-0 z-40">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-indigo-600">ניהול משובים</h1>
-                <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <span id="user-email" class="text-gray-600 text-sm sm:text-base"></span>
+                <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                    <span id="user-email" class="text-gray-600 text-sm sm:text-base hidden"></span>
+                    <button id="toggle-user-email-btn" class="p-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
                     <button id="logout-btn" class="w-auto px-4 py-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-red-500 hover:bg-red-600 focus:ring-red-400">התנתק</button>
                 </div>
             </div>
@@ -219,6 +224,7 @@
         const logoutBtn = document.getElementById('logout-btn');
         const rememberMeCheckbox = document.getElementById('remember-me');
         const feedbackList = document.getElementById('feedback-list');
+        const toggleUserEmailBtn = document.getElementById('toggle-user-email-btn');
 
         // Modal Elements
         const feedbackModal = document.getElementById('feedback-modal');
@@ -303,6 +309,11 @@
             confirmDeleteBtn.addEventListener('click', handleDeleteConfirmation);
 
             toggleFiltersBtn.addEventListener('click', () => filtersContainer.classList.toggle('expanded'));
+            toggleUserEmailBtn.addEventListener('click', () => {
+                userEmailSpan.classList.toggle('hidden');
+                toggleUserEmailBtn.querySelector('svg').classList.toggle('rotate-180');
+            });
+
             [filterText, filterType, filterUser, filterMyFeedback, filterDateStart, filterDateEnd].forEach(el => {
                 el.addEventListener('input', applyFiltersAndRender);
             });
@@ -425,7 +436,7 @@
         
         function populateUserFilter(users) {
             const currentVal = filterUser.value;
-            filterUser.innerHTML = '<option value="">כל המשתמשים</option>'; // Reset
+            filterUser.innerHTML = '<option value="">כל המשתמשים</option>';
             users.forEach(user => {
                 const option = document.createElement('option');
                 option.value = user;
@@ -495,56 +506,67 @@
 
         function renderFeedback(feedbacks) {
             feedbackList.innerHTML = '';
-            if (filterMyFeedback.checked && feedbacks.length === 0) {
-                 const userHasNoFeedbackAtAll = !allFeedbacks.some(fb => fb.author === auth.currentUser.email);
-                 if (userHasNoFeedbackAtAll) {
-                    return; 
-                 }
+            
+            if (filterMyFeedback.checked && feedbacks.length === 0 && !allFeedbacks.some(fb => fb.author === auth.currentUser?.email)) {
+                return; 
             }
+
             if (feedbacks.length === 0) {
                 feedbackList.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-lg text-center text-gray-500">לא נמצאו משובים התואמים את הסינון.</div>`;
                 return;
             }
             
             feedbacks.forEach(fb => {
-                const date = fb.createdAt ? fb.createdAt.toDate().toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' }) : 'לא זמין';
-                const [borderColor, tagBgColor, tagTextColor] = getFeedbackTypeColors(fb.type).split(' ');
+                const datePart = fb.createdAt ? fb.createdAt.toDate().toLocaleDateString('he-IL', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
+                const timePart = fb.createdAt ? fb.createdAt.toDate().toLocaleTimeString('he-IL', {hour: '2-digit', minute: '2-digit'}) : '';
+                const date = fb.createdAt ? `${datePart} • ${timePart}` : 'לא זמין';
                 
+                const [borderColor, tagBgColor, tagTextColor] = getFeedbackTypeColors(fb.type).split(' ');
+                const detailsFirstThreeWords = fb.details.split(/\s+/).slice(0, 3).join(' ') + (fb.details.split(/\s+/).length > 3 ? '...' : '');
+
                 const card = document.createElement('div');
                 card.className = `bg-white rounded-xl shadow-lg`;
                 card.innerHTML = `
                     <div class="card-header p-4 flex justify-between items-center cursor-pointer border-l-4 ${borderColor} rounded-r-lg">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-4">
-                                <span class="text-sm font-bold ${tagTextColor} ${tagBgColor} px-3 py-1 rounded-full">${fb.type}</span>
-                                <p class="text-gray-800 truncate">${fb.details}</p>
-                            </div>
+                        <div class="flex-1 min-w-0 flex items-center gap-4">
+                            <span class="text-sm font-bold ${tagTextColor} ${tagBgColor} px-3 py-1 rounded-full w-28 text-center flex-shrink-0">${fb.type}</span>
+                            <p class="text-gray-800 truncate">${detailsFirstThreeWords}</p>
                         </div>
                         <div class="flex items-center space-x-2 rtl:space-x-reverse ml-2 rtl:ml-0 rtl:mr-2 flex-shrink-0">
-                             ${fb.author === auth.currentUser.email ? 
-                                `<button class="edit-btn text-gray-400 hover:text-indigo-600 p-1" data-id="${fb.id}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                                        <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                                <button class="delete-btn text-gray-400 hover:text-red-600 p-1" data-id="${fb.id}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>` : ''}
                             <span class="text-xs text-gray-500">${date}</span>
                             <svg class="h-5 w-5 text-gray-500 chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </div>
                     </div>
                     <div class="collapsible-content">
-                        <div class="p-4 border-t">
-                            <h4 class="font-semibold text-gray-700 mb-2">פרטי הלקוח/ה</h4>
-                            <p class="text-sm text-gray-600"><strong class="font-medium">שם:</strong> ${fb.client.name}</p>
-                            <p class="text-sm text-gray-600"><strong class="font-medium">טלפון:</strong> <a href="tel:${fb.client.phone}" class="text-indigo-600 hover:underline">${fb.client.phone}</a></p>
-                            <p class="text-sm text-gray-600"><strong class="font-medium">עיר:</strong> ${fb.client.city}</p>
-                            <p class="text-sm text-gray-600"><strong class="font-medium">מייל:</strong> ${fb.client.email}</p>
-                            <p class="text-sm text-gray-500 mt-2"><strong class="font-medium">נפתח על ידי:</strong> ${fb.author}</p>
+                        <div class="p-4 border-t space-y-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-semibold text-gray-700">פרטי הפנייה/המשוב</h4>
+                                    <p class="text-gray-800 whitespace-pre-wrap mt-1">${fb.details}</p>
+                                </div>
+                                ${fb.author === auth.currentUser.email ? 
+                                    `<div class="flex items-center space-x-2 rtl:space-x-reverse flex-shrink-0 ml-4">
+                                        <button class="edit-btn text-gray-400 hover:text-indigo-600 p-1" data-id="${fb.id}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                                                <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                        <button class="delete-btn text-gray-400 hover:text-red-600 p-1" data-id="${fb.id}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                              <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>` : ''}
+                            </div>
+                            <div class="border-t pt-4 mt-4">
+                                <h4 class="font-semibold text-gray-700 mb-2">פרטי הלקוח/ה</h4>
+                                <p class="text-sm text-gray-600"><strong class="font-medium">שם:</strong> ${fb.client.name}</p>
+                                <p class="text-sm text-gray-600"><strong class="font-medium">טלפון:</strong> <a href="tel:${fb.client.phone}" class="text-indigo-600 hover:underline">${fb.client.phone}</a></p>
+                                <p class="text-sm text-gray-600"><strong class="font-medium">עיר:</strong> ${fb.client.city}</p>
+                                <p class="text-sm text-gray-600"><strong class="font-medium">מייל:</strong> ${fb.client.email}</p>
+                                <p class="text-sm text-gray-500 mt-2"><strong class="font-medium">נפתח על ידי:</strong> ${fb.author}</p>
+                            </div>
                         </div>
                     </div>
                 `;
