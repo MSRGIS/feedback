@@ -303,6 +303,7 @@
 
         let auth, db, rtdb;
         let allFeedbacks = [];
+        let allRegisteredUsers = []; // Will hold {uid, email} for ALL users
         let feedbackIdToDelete = null;
 
         // --- Securely Fetch Firebase Config ---
@@ -315,6 +316,18 @@
                 console.error("Error fetching config:", error);
                 document.body.innerHTML = '<h1 class="text-center text-red-500 p-8">שגיאה קריטית: לא ניתן לטעון את הגדרות המערכת.</h1>';
                 return null;
+            }
+        }
+        
+        // --- Fetch All Users ---
+        async function fetchAllUsers() {
+             try {
+                const response = await fetch('/.netlify/functions/get-all-users');
+                if (!response.ok) throw new Error('Could not fetch user list.');
+                allRegisteredUsers = await response.json();
+            } catch (error) {
+                console.error("Error fetching all users:", error);
+                // We can continue without the full user list, it will just show users who have posted.
             }
         }
         
@@ -331,12 +344,15 @@
             db = getFirestore(app);
             rtdb = getDatabase(app);
 
-            onAuthStateChanged(auth, user => {
+            onAuthStateChanged(auth, async user => {
                 loadingOverlay.classList.add('hidden');
                 if (user) {
                     loginSection.classList.add('hidden');
                     appSection.classList.remove('hidden');
                     userEmailMenuSpan.textContent = user.email;
+                    
+                    await fetchAllUsers(); // Fetch the master user list
+                    
                     setupPresence(user);
                     fetchFeedback();
                 } else {
@@ -621,38 +637,30 @@
             `;
             feedbackStats.innerHTML = statsHTML;
 
-            // Update user status list using a map of UID -> email
-            const userMap = new Map();
-            allFeedbacks.forEach(fb => {
-                // We need both authorUid and author email to build the list
-                if (fb.authorUid && fb.author) {
-                    userMap.set(fb.authorUid, fb.author);
-                }
-            });
-
-            // Add the current user to the map if they haven't submitted feedback yet,
-            // so they still appear in the status list.
-            if (auth.currentUser && !userMap.has(auth.currentUser.uid)) {
-                userMap.set(auth.currentUser.uid, auth.currentUser.email);
+            // Update user status list from the master list
+            userStatusList.innerHTML = '';
+            if (allRegisteredUsers.length === 0) {
+                 userStatusList.innerHTML = '<p class="text-xs text-gray-500">לא ניתן היה לטעון את רשימת המשתמשים.</p>';
+                 return;
             }
 
-            userStatusList.innerHTML = '';
-            userMap.forEach((email, uid) => {
-                const statusRef = ref(rtdb, `status/${uid}`);
+            allRegisteredUsers.sort((a, b) => a.email.localeCompare(b.email)).forEach(user => {
+                const statusRef = ref(rtdb, `status/${user.uid}`);
                 const listItem = document.createElement('div');
                 listItem.className = 'flex items-center gap-2 text-sm';
                 listItem.innerHTML = `
-                    <span class="h-2 w-2 rounded-full bg-gray-400"></span>
-                    <span class="text-gray-700 break-all">${email}</span>
+                    <span class="h-2 w-2 rounded-full bg-gray-400 animate-pulse"></span>
+                    <span class="text-gray-700 break-all">${user.email}</span>
                 `;
                 userStatusList.appendChild(listItem);
 
                 onValue(statusRef, (snap) => {
                     const status = snap.val() || { isOnline: false };
                     const statusDot = listItem.querySelector('span');
+                    statusDot.classList.remove('animate-pulse', 'bg-gray-400');
                     statusDot.classList.toggle('bg-green-500', status.isOnline);
                     statusDot.classList.toggle('bg-red-500', !status.isOnline);
-                }, { onlyOnce: false });
+                });
             });
         }
 
