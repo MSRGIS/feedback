@@ -44,9 +44,9 @@
             <div class="flex justify-center items-center gap-3 text-gray-800">
                 <!-- User's SVG will be loaded here. Make sure 'logo.svg' is in the root folder. -->
                 <img src="./logo.svg" alt="לוגו" class="h-10 w-10">
-                <h1 class="text-3xl font-bold text-center">מערכת משוב לקוחות</h1>
+                <h1 class="text-3xl font-bold text-center">מערכת משוב</h1>
             </div>
-            <p class="text-center text-gray-500">נא התחבר כדי להמשיך</p>
+            <p class="text-center text-gray-500">כי אם לא תתחבר, איך המשוב יווצר?</p>
             <div id="auth-error" class="text-red-500 text-center font-semibold hidden"></div>
             <form id="login-form" class="space-y-4">
                 <input type="email" id="email" placeholder="כתובת מייל" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors" required>
@@ -67,7 +67,7 @@
                 <div class="flex items-center gap-2">
                      <!-- User's SVG will be loaded here. Make sure 'logo.svg' is in the root folder. -->
                     <img src="./logo.svg" alt="לוגו" class="h-8 w-8">
-                    <h1 class="text-2xl font-bold text-indigo-600">ניהול משובים</h1>
+                    <h1 class="text-2xl font-bold text-indigo-600">ניהול משובים MSR</h1>
                 </div>
                 <button id="open-menu-btn" title="תפריט" class="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -149,7 +149,7 @@
     <div id="menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden opacity-0 transition-opacity duration-300 ease-in-out"></div>
     <div id="side-menu" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="p-4 border-b flex justify-between items-center flex-shrink-0">
-            <h2 class="font-bold text-lg text-gray-800">תפריט</h2>
+            <h2 class="font-bold text-lg text-gray-800"></h2>
             <button id="close-menu-btn" class="p-1 text-gray-500 hover:text-gray-800">
                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -172,7 +172,7 @@
         </div>
         <div class="p-4 border-t flex-shrink-0">
             <div>
-                <span class="text-sm text-gray-500">מחובר כמשתמש:</span>
+                <span class="text-sm text-gray-500"></span>
                 <p id="user-email-menu" class="text-gray-800 font-semibold break-words"></p>
             </div>
             <button id="logout-btn" title="התנתק" class="mt-4 w-full flex items-center justify-center gap-2 p-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-red-500 hover:bg-red-600 focus:ring-red-400">
@@ -226,7 +226,7 @@
                         <input type="email" id="client-email" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                     </div>
                     <div>
-                        <label for="feedback-details" class="block text-sm font-medium text-gray-700">פרטי הפנייה/המשוב</label>
+                        <label for="feedback-details" class="block text-sm font-medium text-gray-700">פרטי המשוב</label>
                         <textarea id="feedback-details" rows="5" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required></textarea>
                     </div>
                     <div class="pt-4 flex justify-end">
@@ -722,7 +722,7 @@
                         <div class="p-4 border-t space-y-4">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h4 class="font-semibold text-gray-700">פרטי הפנייה/המשוב</h4>
+                                    <h4 class="font-semibold text-gray-700">פרטי המשוב</h4>
                                     <p class="text-gray-800 whitespace-pre-wrap mt-1">${fb.details}</p>
                                 </div>
                                 ${fb.author === auth.currentUser.email ? 
@@ -802,3 +802,4 @@
     </script>
 </body>
 </html>
+
