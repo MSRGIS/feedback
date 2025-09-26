@@ -44,9 +44,9 @@
             <div class="flex justify-center items-center gap-3 text-gray-800">
                 <!-- User's SVG will be loaded here. Make sure 'logo.svg' is in the root folder. -->
                 <img src="./logo.svg" alt="לוגו" class="h-10 w-10">
-                <h1 class="text-3xl font-bold text-center">מערכת משוב</h1>
+                <h1 class="text-3xl font-bold text-center">מערכת משוב לקוחות</h1>
             </div>
-            <p class="text-center text-gray-500">כי אם לא תתחבר, איך נדבר?</p>
+            <p class="text-center text-gray-500">נא התחבר כדי להמשיך</p>
             <div id="auth-error" class="text-red-500 text-center font-semibold hidden"></div>
             <form id="login-form" class="space-y-4">
                 <input type="email" id="email" placeholder="כתובת מייל" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors" required>
@@ -55,7 +55,7 @@
                     <input id="remember-me" type="checkbox" checked class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                     <label for="remember-me" class="ml-2 rtl:mr-2 block text-sm text-gray-900">זכור אותי</label>
                 </div>
-                <button type="submit" class="w-full px-4 py-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500">התחבר</button>
+                <button type="submit" class="w-full px-4 py-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500">התחברות</button>
             </form>
         </div>
     </div>
@@ -147,21 +147,35 @@
 
     <!-- Side Menu -->
     <div id="menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300 ease-in-out"></div>
-    <div id="side-menu" class="fixed top-0 right-0 h-full w-72 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
-        <div class="p-4 border-b flex justify-between items-center">
-            <h2 class="font-bold text-lg text-gray-800"></h2>
+    <div id="side-menu" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <div class="p-4 border-b flex justify-between items-center flex-shrink-0">
+            <h2 class="font-bold text-lg text-gray-800">תפריט</h2>
             <button id="close-menu-btn" class="p-1 text-gray-500 hover:text-gray-800">
                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
-        <div class="p-4 space-y-4">
-            <div>
-                <span class="text-sm text-gray-500"></span>
-                <p id="user-email" class="text-gray-800 font-semibold break-words"></p>
+        <div class="flex-grow overflow-y-auto">
+             <div class="p-4 border-b">
+                <h3 class="text-sm text-gray-500 mb-2">סטטוס משתמשים</h3>
+                <div id="user-status-list" class="space-y-2">
+                    <!-- User status list will be injected here -->
+                </div>
             </div>
-            <button id="logout-btn" title="התנתק" class="w-full flex items-center justify-center gap-2 p-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-red-500 hover:bg-red-600 focus:ring-red-400">
+            <div class="p-4 border-b">
+                <h3 class="text-sm text-gray-500 mb-2">סיכום משובים</h3>
+                <div id="feedback-stats" class="space-y-2">
+                    <!-- Feedback stats will be injected here -->
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t flex-shrink-0">
+            <div>
+                <span class="text-sm text-gray-500">מחובר כמשתמש:</span>
+                <p id="user-email-menu" class="text-gray-800 font-semibold break-words"></p>
+            </div>
+            <button id="logout-btn" title="התנתק" class="mt-4 w-full flex items-center justify-center gap-2 p-2 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105 bg-red-500 hover:bg-red-600 focus:ring-red-400">
                 <span>התנתק</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V5h10a1 1 0 100-2H3zm12.293 4.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L16.586 13H7a1 1 0 110-2h9.586l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -212,7 +226,7 @@
                         <input type="email" id="client-email" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                     </div>
                     <div>
-                        <label for="feedback-details" class="block text-sm font-medium text-gray-700">פרטי המשוב</label>
+                        <label for="feedback-details" class="block text-sm font-medium text-gray-700">פרטי הפנייה/המשוב</label>
                         <textarea id="feedback-details" rows="5" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required></textarea>
                     </div>
                     <div class="pt-4 flex justify-end">
@@ -240,6 +254,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getDatabase, ref, onValue, set, onDisconnect, serverTimestamp as serverTimestampRTDB } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
         // DOM Elements
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -249,7 +264,7 @@
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const authError = document.getElementById('auth-error');
-        const userEmailSpan = document.getElementById('user-email');
+        const userEmailMenuSpan = document.getElementById('user-email-menu');
         const rememberMeCheckbox = document.getElementById('remember-me');
         const feedbackList = document.getElementById('feedback-list');
         
@@ -259,6 +274,8 @@
         const sideMenu = document.getElementById('side-menu');
         const menuOverlay = document.getElementById('menu-overlay');
         const logoutBtn = document.getElementById('logout-btn');
+        const userStatusList = document.getElementById('user-status-list');
+        const feedbackStats = document.getElementById('feedback-stats');
 
 
         // Modal Elements
@@ -284,7 +301,7 @@
         const filterDateEnd = document.getElementById('filter-date-end');
         const resetFiltersBtn = document.getElementById('reset-filters-btn');
 
-        let auth, db;
+        let auth, db, rtdb;
         let allFeedbacks = [];
         let feedbackIdToDelete = null;
 
@@ -312,22 +329,38 @@
             const app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
+            rtdb = getDatabase(app);
 
             onAuthStateChanged(auth, user => {
                 loadingOverlay.classList.add('hidden');
                 if (user) {
                     loginSection.classList.add('hidden');
                     appSection.classList.remove('hidden');
-                    userEmailSpan.textContent = user.email;
+                    userEmailMenuSpan.textContent = user.email;
+                    setupPresence(user);
                     fetchFeedback();
                 } else {
                     appSection.classList.add('hidden');
                     loginSection.classList.remove('hidden');
-                    userEmailSpan.textContent = '';
+                    userEmailMenuSpan.textContent = '';
                 }
             });
 
             setupEventListeners();
+        }
+        
+        // --- Presence System (Realtime Database) ---
+        function setupPresence(user) {
+            // We use the user's unique ID (UID) as it's secure and path-safe
+            const userStatusRef = ref(rtdb, `status/${user.uid}`);
+            
+            const connectedRef = ref(rtdb, '.info/connected');
+            onValue(connectedRef, (snap) => {
+                if (snap.val() === true) {
+                    set(userStatusRef, { isOnline: true, lastOnline: serverTimestampRTDB() });
+                    onDisconnect(userStatusRef).set({ isOnline: false, lastOnline: serverTimestampRTDB() });
+                }
+            });
         }
 
         function setupEventListeners() {
@@ -335,8 +368,10 @@
             
             // Menu Listeners
             openMenuBtn.addEventListener('click', () => {
+                updateSideMenuContent();
                 sideMenu.classList.remove('translate-x-full');
-                menuOverlay.classList.remove('hidden', 'opacity-0');
+                menuOverlay.classList.remove('hidden');
+                setTimeout(() => menuOverlay.classList.remove('opacity-0'), 10);
             });
             const closeMenu = () => {
                 sideMenu.classList.add('translate-x-full');
@@ -413,6 +448,7 @@
                     await updateDoc(feedbackRef, feedbackData);
                 } else { // Add new feedback
                     feedbackData.author = user.email;
+                    feedbackData.authorUid = user.uid; // Add the UID for presence tracking
                     feedbackData.createdAt = serverTimestamp();
                     await addDoc(collection(db, "feedback"), feedbackData);
                 }
@@ -557,6 +593,69 @@
                 default:           return 'border-gray-500 bg-gray-100 text-gray-700';
             }
         }
+        
+        function updateSideMenuContent() {
+            // Update Stats
+            const total = allFeedbacks.length;
+            const counts = {
+                'תלונה': allFeedbacks.filter(f => f.type === 'תלונה').length,
+                'מחמאה': allFeedbacks.filter(f => f.type === 'מחמאה').length,
+                'הצעה לשיפור': allFeedbacks.filter(f => f.type === 'הצעה לשיפור').length,
+                'שאלה טכנית': allFeedbacks.filter(f => f.type === 'שאלה טכנית').length,
+                'אחר': allFeedbacks.filter(f => f.type === 'אחר').length,
+            };
+            const statsHTML = `
+                <div class="flex justify-between items-center text-sm">
+                    <span class="font-bold">סה"כ משובים:</span>
+                    <span class="px-2 py-0.5 bg-gray-700 text-white rounded-full font-semibold">${total}</span>
+                </div>
+                <div class="flex justify-start items-center gap-2 text-xs flex-wrap">
+                    <span class="px-2 py-0.5 ${getFeedbackTypeColors('תלונה').split(' ')[1]} ${getFeedbackTypeColors('תלונה').split(' ')[2]} rounded-full">תלונות: ${counts['תלונה']}</span>
+                    <span class="px-2 py-0.5 ${getFeedbackTypeColors('מחמאה').split(' ')[1]} ${getFeedbackTypeColors('מחמאה').split(' ')[2]} rounded-full">מחמאות: ${counts['מחמאה']}</span>
+                </div>
+                 <div class="flex justify-start items-center gap-2 text-xs flex-wrap">
+                    <span class="px-2 py-0.5 ${getFeedbackTypeColors('הצעה לשיפור').split(' ')[1]} ${getFeedbackTypeColors('הצעה לשיפור').split(' ')[2]} rounded-full">הצעות: ${counts['הצעה לשיפור']}</span>
+                    <span class="px-2 py-0.5 ${getFeedbackTypeColors('שאלה טכנית').split(' ')[1]} ${getFeedbackTypeColors('שאלה טכנית').split(' ')[2]} rounded-full">טכני: ${counts['שאלה טכנית']}</span>
+                    <span class="px-2 py-0.5 ${getFeedbackTypeColors('אחר').split(' ')[1]} ${getFeedbackTypeColors('אחר').split(' ')[2]} rounded-full">אחר: ${counts['אחר']}</span>
+                </div>
+            `;
+            feedbackStats.innerHTML = statsHTML;
+
+            // Update user status list using a map of UID -> email
+            const userMap = new Map();
+            allFeedbacks.forEach(fb => {
+                // We need both authorUid and author email to build the list
+                if (fb.authorUid && fb.author) {
+                    userMap.set(fb.authorUid, fb.author);
+                }
+            });
+
+            // Add the current user to the map if they haven't submitted feedback yet,
+            // so they still appear in the status list.
+            if (auth.currentUser && !userMap.has(auth.currentUser.uid)) {
+                userMap.set(auth.currentUser.uid, auth.currentUser.email);
+            }
+
+            userStatusList.innerHTML = '';
+            userMap.forEach((email, uid) => {
+                const statusRef = ref(rtdb, `status/${uid}`);
+                const listItem = document.createElement('div');
+                listItem.className = 'flex items-center gap-2 text-sm';
+                listItem.innerHTML = `
+                    <span class="h-2 w-2 rounded-full bg-gray-400"></span>
+                    <span class="text-gray-700 break-all">${email}</span>
+                `;
+                userStatusList.appendChild(listItem);
+
+                onValue(statusRef, (snap) => {
+                    const status = snap.val() || { isOnline: false };
+                    const statusDot = listItem.querySelector('span');
+                    statusDot.classList.toggle('bg-green-500', status.isOnline);
+                    statusDot.classList.toggle('bg-red-500', !status.isOnline);
+                }, { onlyOnce: false });
+            });
+        }
+
 
         function renderFeedback(feedbacks) {
             feedbackList.innerHTML = '';
@@ -595,7 +694,7 @@
                         <div class="p-4 border-t space-y-4">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h4 class="font-semibold text-gray-700">פרטי המשוב</h4>
+                                    <h4 class="font-semibold text-gray-700">פרטי הפנייה/המשוב</h4>
                                     <p class="text-gray-800 whitespace-pre-wrap mt-1">${fb.details}</p>
                                 </div>
                                 ${fb.author === auth.currentUser.email ? 
@@ -675,6 +774,3 @@
     </script>
 </body>
 </html>
-
-
-
